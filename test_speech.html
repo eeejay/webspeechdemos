@@ -1,0 +1,113 @@
+<html lang="fr-FR">
+  <head>
+    <title>Test Speech Web API</title>
+  </head>
+  <body>
+    <h1>Test Speech Web API</h1>
+    <form name="speakform" action="" style="float: left; width: 48%;">
+
+      <fieldset>
+        <legend>Text</legend>
+        <textarea style="width: 100%;" rows="6" name="text">Hello world!</textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Tweak voice attributes</legend>
+        <label id="voicelabel">Select voice:</label>
+        <select name="voice" aria-labelledby="voicelabel">
+          <option value="">-</option>
+        </select>
+        <br/>
+        <label id="langlabel">Language:</label>
+        <input aria-labelledby="langlabel" name="lang">
+        <br/>
+        <label id="volumelabel">Volume:</label>
+        <input aria-labelledby="volumelabel" type="range"
+               name="volume" min="0" max="1" step="0.1" value="1">        
+        <br/>
+        <label id="ratelabel">Rate:</label>
+        <input aria-labelledby="ratelabel" type="range"
+               name="rate" min="0.1" max="10" step="0.1" value="1">
+        <br/>
+        <label id="pitchlabel">Pitch:</label>
+        <input aria-labelledby="pitchlabel" type="range"
+               name="pitch" min="0" max="2" step="0.1" value="1">
+      </fieldset>
+
+      <button type="button" id="speak">Speak!</button>
+      <button type="button" id="pause">Pause</button>
+      <button type="button" id="resume">Resume</button>
+      <button type="button" id="cancel">Cancel</button>
+
+    </form>
+
+    <ul id="eventlog" style="border: 1px solid green; float: left; width: 40%; height: 80%; overflow: auto;">
+    </ul>
+
+    <script>
+  var voices = window.speechSynthesis.getVoices();
+  var selectElm = document.querySelector('select[name="voice"]')
+  for (var i=0;i < voices.length;i++) {
+    var option = document.createElement('option');
+    option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
+    option.setAttribute('value', voices[i].voiceURI);
+    selectElm.appendChild(option);
+  }
+  var eventLog = document.querySelector('ul#eventlog');
+  function eventHandler(event) {
+    console.log(event);
+    var eventEntry = document.createElement('li');
+    eventEntry.innerHTML = '<strong>' + event.type + '</strong> offset: ' + event.charIndex + ' time: ' + event.elapsedTime;
+    eventLog.appendChild(eventEntry);
+    eventEntry.scrollIntoView();
+  }
+
+  var utterance = null;
+  var speakButton = document.querySelector('button#speak');
+  speakButton.addEventListener(
+    'click',
+    function (e) {
+      var form = document.forms['speakform'];
+      utterance = new SpeechSynthesisUtterance(form.text.value);
+      utterance.voiceURI = form.voice.value;
+      utterance.lang = form.lang.value;
+      utterance.volume = form.volume.value;
+      utterance.rate = form.rate.value;
+      utterance.pitch = form.pitch.value;
+
+      utterance.addEventListener('start', eventHandler);
+      utterance.addEventListener('boundary', eventHandler);
+      utterance.addEventListener('end', eventHandler);
+      utterance.addEventListener('pause', eventHandler);
+      utterance.addEventListener('resume', eventHandler);
+
+      window.speechSynthesis.speak(utterance);
+    }
+  );
+
+  var pauseButton = document.querySelector('button#pause');
+  pauseButton.addEventListener(
+    'click',
+    function (e) {
+      window.speechSynthesis.pause();
+    }
+  );
+
+  var resumeButton = document.querySelector('button#resume');
+  resumeButton.addEventListener(
+    'click',
+    function (e) {
+      window.speechSynthesis.resume();
+    }
+  );
+
+  var cancelButton = document.querySelector('button#cancel');
+  cancelButton.addEventListener(
+    'click',
+    function (e) {
+      window.speechSynthesis.cancel();
+    }
+  );
+
+    </script>
+  </body>
+</html>
