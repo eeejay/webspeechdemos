@@ -34,6 +34,7 @@
       </fieldset>
 
       <button type="button" id="speak">Speak!</button>
+      <button type="button" id="interrupt">Interrupt</button>
       <button type="button" id="pause">Pause</button>
       <button type="button" id="resume">Resume</button>
       <button type="button" id="cancel">Cancel</button>
@@ -62,25 +63,39 @@
   }
 
   var utterance = null;
+  function speakIt() {
+    var form = document.forms['speakform'];
+    utterance = new SpeechSynthesisUtterance(form.text.value);
+    utterance.voice = form.voice.options[form.voice.selectedIndex].voice;
+    utterance.lang = form.lang.value;
+    utterance.volume = form.volume.value;
+    utterance.rate = form.rate.value;
+    utterance.pitch = form.pitch.value;
+    
+    utterance.addEventListener('start', eventHandler);
+    utterance.addEventListener('boundary', eventHandler);
+    utterance.addEventListener('end', eventHandler);
+    utterance.addEventListener('pause', eventHandler);
+    utterance.addEventListener('resume', eventHandler);
+   
+    console.log(utterance.voice);
+ 
+    window.speechSynthesis.speak(utterance);
+  }
+
   var speakButton = document.querySelector('button#speak');
   speakButton.addEventListener(
+    'click', function (e) {
+      speakIt();
+    }
+  );
+
+  var interruptButton = document.querySelector('button#interrupt');
+  interruptButton.addEventListener(
     'click',
     function (e) {
-      var form = document.forms['speakform'];
-      utterance = new SpeechSynthesisUtterance(form.text.value);
-      utterance.voiceURI = form.voice.value;
-      utterance.lang = form.lang.value;
-      utterance.volume = form.volume.value;
-      utterance.rate = form.rate.value;
-      utterance.pitch = form.pitch.value;
-
-      utterance.addEventListener('start', eventHandler);
-      utterance.addEventListener('boundary', eventHandler);
-      utterance.addEventListener('end', eventHandler);
-      utterance.addEventListener('pause', eventHandler);
-      utterance.addEventListener('resume', eventHandler);
-
-      window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.cancel();
+      speakIt();
     }
   );
 
