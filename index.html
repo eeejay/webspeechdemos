@@ -45,17 +45,14 @@
     </ul>
 
     <script>
-  window.speechSynthesis.getVoices(
-    function (voices) {
-      var selectElm = document.querySelector('select[name="voice"]')
-      for (var i=0;i < voices.length;i++) {
-        var option = document.createElement('option');
-        option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
-        option.setAttribute('value', voices[i].voiceURI);
-        option.voice = voices[i];
-        selectElm.appendChild(option);
-      }
-    });
+  var voices = window.speechSynthesis.getVoices();
+  var selectElm = document.querySelector('select[name="voice"]')
+  for (var i=0;i < voices.length;i++) {
+    var option = document.createElement('option');
+    option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
+    option.setAttribute('value', voices[i].voiceURI);
+    selectElm.appendChild(option);
+  }
   var eventLog = document.querySelector('ul#eventlog');
   function eventHandler(event) {
     console.log(event);
