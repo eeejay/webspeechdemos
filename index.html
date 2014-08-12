@@ -67,7 +67,7 @@
   function speakIt() {
     var form = document.forms['speakform'];
     utterance = new SpeechSynthesisUtterance(form.text.value);
-    utterance.voice = form.voice.options[form.voice.selectedIndex].voice;
+    utterance.voice = voices[form.voice.selectedIndex-1];
     utterance.lang = form.lang.value;
     utterance.volume = form.volume.value;
     utterance.rate = form.rate.value;
