@@ -51,6 +51,7 @@
     var option = document.createElement('option');
     option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
     option.setAttribute('value', voices[i].voiceURI);
+    option.voice = voices[i];
     selectElm.appendChild(option);
   }
   var eventLog = document.querySelector('ul#eventlog');
