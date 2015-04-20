@@ -1,129 +1,321 @@
-<html lang="en-GB">
+<html>
   <head>
-    <title>Test Speech Web API</title>
-  </head>
-  <body>
-    <h1>Test Speech Web API</h1>
-    <form name="speakform" action="" style="float: left; width: 48%;">
+    <title>Web Speech Synthesis Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+    <style>
+      body {
+        background-color: #333;
+        color: #fff;
+      }
+      h1 {
+        max-width: 480px;
+        margin: 2rem auto;
+        font-size: 150%;
+      }
+      form {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      button, select {
+        background-color: #fff;
+        border: none;
+        border-radius: 2px;
+        height: 1.5rem;
+      }
+      select {
+       -webkit-appearance: none;
+       -moz-appearance: none;
+       appearance: none;
+     }
 
-      <fieldset>
-        <legend>Text</legend>
-        <textarea style="width: 100%;" rows="6" name="text">Hello world!</textarea>
-      </fieldset>
-      <fieldset>
-        <legend>Tweak voice attributes</legend>
-        <label id="voicelabel">Select voice:</label>
-        <select name="voice" aria-labelledby="voicelabel">
-          <option value="">-</option>
-        </select>
-        <br/>
-        <label id="langlabel">Language:</label>
-        <input aria-labelledby="langlabel" name="lang">
-        <br/>
-        <label id="volumelabel">Volume:</label>
-        <input aria-labelledby="volumelabel" type="range"
-               name="volume" min="0" max="1" step="0.1" value="1">        
-        <br/>
-        <label id="ratelabel">Rate:</label>
-        <input aria-labelledby="ratelabel" type="range"
-               name="rate" min="0.1" max="10" step="0.1" value="1">
-        <br/>
-        <label id="pitchlabel">Pitch:</label>
-        <input aria-labelledby="pitchlabel" type="range"
-               name="pitch" min="0" max="2" step="0.1" value="1">
-      </fieldset>
+     /* Some firefox range styling */
+     input[type=range] {
+      -moz-appearance: none;
+     }
+     input[type=range]::-moz-range-thumb {
+      background-color: #fff;
+      height: 1rem;
+      width: .5rem;
+      border-color: #fff;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+     }
+     input[type=range]::-moz-range-track {
+      background-color: #fff;
+     }
 
-      <button type="button" id="speak">Speak!</button>
-      <button type="button" id="interrupt">Interrupt</button>
-      <button type="button" id="pause">Pause</button>
-      <button type="button" id="resume">Resume</button>
-      <button type="button" id="cancel">Cancel</button>
+      .speecharg {
+        height: 2rem;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: space-between;
+        justify-content: space-between;
+        align-items: center;
+        -webkit-align-items: center;
+      }
+      .speecharg label {
+        display: inline-block;
+        width: 20%;
+      }
+      .speecharg input, .speecharg select {
+        display: inline-block;
+        width: calc(80% - 3rem);
+        margin: 0;
+      }
+      .speecharg button {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin: 0 0 0 1.5rem;
+        display: inline-block;
+        padding: 0;
+      }
+      .bottom {
+        margin-top: 1rem;
+        margin: 1rem 0;
+        display: -webkit-flex;
+        display: flex;
+        justify-content: space-between;
+        -webkit-justify-content: space-between;
+      }
+      .bottom > * {
+      }
+      .bottom button {
+        width: 42%;
+        height: 1.5rem;
+      }
+      .bottom button.small {
+        width: 1.5rem;
+        padding: 0;
+      }
 
-    </form>
+      #textarea {
+         width: 100%;
+         height: 8rem;
+         display: block;
+         margin-bottom: 1rem;
+         border-radius: 5px;
+         position: relative;
+         background-color: #fff;
+         transition: background-color 100ms ease;
+         -webkit-transition: background-color 100ms ease;
+       }
 
-    <ul id="eventlog" style="border: 1px solid green; float: left; width: 40%; height: 80%; overflow: auto;">
-    </ul>
+       .speaking #textarea {
+        background-color: #333;
+       }
 
+      #textarea > * {
+        position: absolute;
+        display: block;
+        border: none;
+        resize: none;
+        top: 0;
+        left: 0;
+        width: calc(100% - 1rem);
+        height: calc(100% - 1rem);
+        margin: .5rem;
+        padding: 0;
+        white-space: pre-wrap;
+        line-height: 1.1rem;
+        background-color: transparent;
+        font-size: 12px;
+        font-family: monospace;
+      }
+
+      #textbeingspoken {
+        color: #aaa;
+        visibility: hidden;
+        opacity: 0;
+        overflow: auto;
+        transition: all 100ms ease;
+        -webkit-transition: all 100ms ease;
+       }
+
+       .speaking #textbeingspoken {
+        visibility: visible;
+        opacity: 1;
+       }
+
+      a#gh {
+        color: #333;
+        text-align: right;
+        display: block;
+        font-style: italic;
+      }
+
+      #marker {
+        position: absolute;
+        visibility: hidden;
+        border: 1px solid orange;
+      }
+
+      #marker.moved {
+        visibility: visible;
+      }
+
+      #marker.animate {
+        transition: all 50ms ease;
+        -webkit-transition: all 50ms ease;
+      }
+
+    </style>
     <script>
-  var voices = window.speechSynthesis.getVoices();
-  var selectElm = document.querySelector('select[name="voice"]')
-  for (var i=0;i < voices.length;i++) {
-    var option = document.createElement('option');
-    option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
-    option.setAttribute('value', voices[i].voiceURI);
-    option.voice = voices[i];
-    selectElm.appendChild(option);
-  }
-  var eventLog = document.querySelector('ul#eventlog');
-  function eventHandler(event) {
-    console.log(event);
-    var eventEntry = document.createElement('li');
-    eventEntry.innerHTML = '<strong>' + event.type + '</strong> offset: ' + event.charIndex + ' time: ' + event.elapsedTime;
-    eventLog.appendChild(eventEntry);
-    eventEntry.scrollIntoView();
+
+  function resetPitch() {
+    document.getElementById('pitch').value = 0.5;
   }
 
-  var utterance = null;
-  function speakIt() {
-    var form = document.forms['speakform'];
-    utterance = new SpeechSynthesisUtterance(form.text.value);
-    utterance.voice = voices[form.voice.selectedIndex-1];
-    utterance.lang = form.lang.value;
-    utterance.volume = form.volume.value;
-    utterance.rate = form.rate.value;
-    utterance.pitch = form.pitch.value;
-    
-    utterance.addEventListener('start', eventHandler);
-    utterance.addEventListener('boundary', eventHandler);
-    utterance.addEventListener('end', eventHandler);
-    utterance.addEventListener('pause', eventHandler);
-    utterance.addEventListener('resume', eventHandler);
-   
-    console.log(utterance.voice);
- 
-    window.speechSynthesis.speak(utterance);
+  function resetRate() {
+    document.getElementById('rate').value = 0;
   }
 
-  var speakButton = document.querySelector('button#speak');
-  speakButton.addEventListener(
-    'click', function (e) {
-      speakIt();
-    }
-  );
+  function resetVolume() {
+    document.getElementById('volume').value = 1;
+  }
 
-  var interruptButton = document.querySelector('button#interrupt');
-  interruptButton.addEventListener(
-    'click',
-    function (e) {
-      window.speechSynthesis.cancel();
-      speakIt();
-    }
-  );
-
-  var pauseButton = document.querySelector('button#pause');
-  pauseButton.addEventListener(
-    'click',
-    function (e) {
-      window.speechSynthesis.pause();
-    }
-  );
-
-  var resumeButton = document.querySelector('button#resume');
-  resumeButton.addEventListener(
-    'click',
-    function (e) {
-      window.speechSynthesis.resume();
-    }
-  );
-
-  var cancelButton = document.querySelector('button#cancel');
-  cancelButton.addEventListener(
-    'click',
-    function (e) {
-      window.speechSynthesis.cancel();
-    }
-  );
-
+  function resetVoice() {
+    document.getElementById('default-voice').selected = true;
+  }
     </script>
+    <style>
+    </style>
+  </head>
+  <body class="loading">
+    <h1>Web Speech Synthesis Demo</h1>
+    <form>
+      <div id="textarea">
+        <textarea id="texttospeak">Call me Ishmael. Some years ago&#8212;never mind how long precisely&#8212;having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.</textarea>
+        <div id="textbeingspoken"></div>
+      </div>
+      <div class="speecharg">
+        <label for="pitch">Pitch</label><input id="pitch" type="range" value="0.5" min="0" max="1" step="0.05"><button type="button" aria-label="Reset pitch" title="Reset pitch" onclick="resetPitch();">&#x21b6;</button>
+      </div>
+      <div class="speecharg">
+        <label for="rate">Rate</label><input id="rate" type="range" value="0" min="-3" max="3" step="0.25"><button type="button" aria-label="Reset rate" title="Reset rate" onclick="resetRate();">&#x21b6;</button>
+      </div>
+      <div class="speecharg">
+        <label for="volue">Volume</label><input id="volume" type="range" value="1" min="0" max="1" step="0.05"><button type="button" aria-label="Reset volume" title="Reset volume" onclick="resetVolume();">&#x21b6;</button>
+      </div>
+      <div class="speecharg">
+        <label for="voice">Voice</label><select id="voice"></select><button type="button" aria-label="Reset voice" title="Reset voice" onclick="resetVoice();">&#x21b6;</button>
+      </div>
+      <div class="bottom">
+        <button type="button" onmousedown="speak();">Speak it</button>
+        <button type="button" id="preachit" onmousedown="stop(); speak();">Interrupt</button>
+        <button type="button" class="small" aria-label="Pause/Resume" title="Pause/Resume" onmousedown="playpause();">&#x23ef;</button>
+        <button type="button" class="small" aria-label="Cancel" title="Cancel" onmousedown="stop();">&#x23f9;</button>
+      </div>
+      <div class="bottom">
+      </div>
+    </form>
+    <div id="marker"></div>
+      <script type="text/javascript">
+        var voices = [];
+        function populateVoiceList() {
+          voices = window.speechSynthesis.getVoices();
+          var selectElm = document.querySelector('#voice');
+          selectElm.innerHTML = '';
+          for (var i=0;i < voices.length;i++) {
+            var option = document.createElement('option');
+            option.innerHTML = voices[i].name + ' (' + voices[i].lang + ')';
+            option.setAttribute('value', voices[i].voiceURI);
+            option.voice = voices[i];
+            if (voices[i].default)
+              option.selected = true;
+            selectElm.appendChild(option);
+          }
+        }
+
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined)
+          speechSynthesis.onvoiceschanged = populateVoiceList;
+
+        function stop() {
+          speechSynthesis.cancel();
+        }
+
+        function playpause() {
+          if (speechSynthesis.paused)
+            speechSynthesis.resume();
+          else
+            speechSynthesis.pause();
+        }
+
+        function logEvent(evt) {
+          console.log('Speech Event:', evt);
+        }
+
+        function speak() {
+          var texttospeak = document.getElementById('texttospeak');
+          var speechtext = texttospeak.value;
+          var textbeingspoken = document.getElementById('textbeingspoken');
+          var marker = document.getElementById('marker');
+          var firstBoundary = true;
+          textbeingspoken.textContent = speechtext;
+
+          var range = document.createRange();
+          utterance = new SpeechSynthesisUtterance(
+            document.getElementById('texttospeak').value);
+          utterance.voice = voices[document.getElementById('voice').selectedIndex];
+          utterance.volume = document.getElementById('volume').value;
+          utterance.pitch = document.getElementById('pitch').value;
+          var rate = document.getElementById('rate').value;
+          utterance.rate = Math.pow(Math.abs(rate) + 1, rate < 0 ? -1 : 1);
+          utterance.addEventListener('start', function () {
+            marker.classList.remove('animate');
+            document.body.classList.add('speaking');
+          });
+          utterance.addEventListener('start', logEvent);
+          utterance.addEventListener('end', logEvent);
+          utterance.addEventListener('end', function () {
+            document.body.classList.remove('speaking');
+            marker.classList.remove('moved');
+          });
+          utterance.addEventListener('error', logEvent);
+          utterance.addEventListener('error', function () {
+            document.body.classList.remove('speaking');
+            marker.classList.remove('moved');
+          });
+          utterance.addEventListener('boundary', logEvent);
+          utterance.addEventListener('boundary', function (e) {
+            if (e.name != 'word') return;
+            var substr = speechtext.slice(e.charIndex);
+            var rex = /[\w\d]+/g;
+            var res = rex.exec(substr);
+            if (!res) return;
+            var startOffset = res.index + e.charIndex;
+            var endOffset = rex.lastIndex + e.charIndex;
+            range.setStart(textbeingspoken.firstChild, startOffset);
+            range.setEnd(textbeingspoken.firstChild, endOffset);
+            var rect = range.getBoundingClientRect();
+            var delta = 0;
+            // do I need to scroll?
+            var parentRect = textbeingspoken.getBoundingClientRect();
+            if (rect.bottom > parentRect.bottom) {
+              delta = rect.bottom - parentRect.bottom;
+            }
+            if (rect.top < parentRect.top) {
+              delta = rect.top - parentRect.top;
+            }
+
+            textbeingspoken.scrollBy(0, delta);
+            texttospeak.scrollTo(0, textbeingspoken.scrollTop);
+
+            marker.style.top = rect.top - delta - 1;
+            marker.style.left = rect.left - 1;
+            marker.style.width = rect.width + 1;
+            marker.style.height = rect.height + 1;
+            marker.classList.add('moved');
+            if (firstBoundary) {
+              firstBoundary = false;
+              marker.classList.add('animate');
+            }
+          });
+          utterance.addEventListener('pause', logEvent);
+          utterance.addEventListener('resume', logEvent);
+
+          speechSynthesis.speak(utterance);
+        }
+
+      </script>
   </body>
 </html>
