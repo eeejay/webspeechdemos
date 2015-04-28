@@ -209,6 +209,13 @@
     </form>
     <div id="marker"></div>
       <script type="text/javascript">
+        var texttospeak = document.getElementById('texttospeak');
+        var textbeingspoken = document.getElementById('textbeingspoken');
+        var marker = document.getElementById('marker');
+        var range = document.createRange();
+        var speechtext;
+        var firstBoundary;
+
         var voices = [];
         function populateVoiceList() {
           voices = window.speechSynthesis.getVoices();
@@ -240,19 +247,11 @@
             speechSynthesis.pause();
         }
 
-        function logEvent(evt) {
-          console.log('Speech Event:', evt);
-        }
-
         function speak() {
-          var texttospeak = document.getElementById('texttospeak');
-          var speechtext = texttospeak.value;
-          var textbeingspoken = document.getElementById('textbeingspoken');
-          var marker = document.getElementById('marker');
-          var firstBoundary = true;
+          speechtext = texttospeak.value;
+          firstBoundary = true;
           textbeingspoken.textContent = speechtext;
 
-          var range = document.createRange();
           utterance = new SpeechSynthesisUtterance(
             document.getElementById('texttospeak').value);
           utterance.voice = voices[document.getElementById('voice').selectedIndex];
@@ -264,56 +263,70 @@
             marker.classList.remove('animate');
             document.body.classList.add('speaking');
           });
-          utterance.addEventListener('start', logEvent);
-          utterance.addEventListener('end', logEvent);
-          utterance.addEventListener('end', function () {
-            document.body.classList.remove('speaking');
-            marker.classList.remove('moved');
-          });
-          utterance.addEventListener('error', logEvent);
-          utterance.addEventListener('error', function () {
-            document.body.classList.remove('speaking');
-            marker.classList.remove('moved');
-          });
-          utterance.addEventListener('boundary', logEvent);
-          utterance.addEventListener('boundary', function (e) {
-            if (e.name != 'word') return;
-            var substr = speechtext.slice(e.charIndex);
-            var rex = /[\w\d]+/g;
-            var res = rex.exec(substr);
-            if (!res) return;
-            var startOffset = res.index + e.charIndex;
-            var endOffset = rex.lastIndex + e.charIndex;
-            range.setStart(textbeingspoken.firstChild, startOffset);
-            range.setEnd(textbeingspoken.firstChild, endOffset);
-            var rect = range.getBoundingClientRect();
-            var delta = 0;
-            // do I need to scroll?
-            var parentRect = textbeingspoken.getBoundingClientRect();
-            if (rect.bottom > parentRect.bottom) {
-              delta = rect.bottom - parentRect.bottom;
-            }
-            if (rect.top < parentRect.top) {
-              delta = rect.top - parentRect.top;
-            }
-
-            textbeingspoken.scrollBy(0, delta);
-            texttospeak.scrollTo(0, textbeingspoken.scrollTop);
-
-            marker.style.top = rect.top - delta - 1;
-            marker.style.left = rect.left - 1;
-            marker.style.width = rect.width + 1;
-            marker.style.height = rect.height + 1;
-            marker.classList.add('moved');
-            if (firstBoundary) {
-              firstBoundary = false;
-              marker.classList.add('animate');
-            }
-          });
-          utterance.addEventListener('pause', logEvent);
-          utterance.addEventListener('resume', logEvent);
+          utterance.addEventListener('start', handleSpeechEvent);
+          utterance.addEventListener('end', handleSpeechEvent);
+          utterance.addEventListener('error', handleSpeechEvent);
+          utterance.addEventListener('boundary', handleSpeechEvent);
+          utterance.addEventListener('pause', handleSpeechEvent);
+          utterance.addEventListener('resume', handleSpeechEvent);
 
           speechSynthesis.speak(utterance);
+        }
+
+        function handleSpeechEvent(e) {
+          console.log('Speech Event:', e);
+
+          switch (e.type) {
+            case 'start':
+              marker.classList.remove('animate');
+              document.body.classList.add('speaking');
+              break;
+            case 'end':
+            case 'endEvent':
+            case 'error':
+              document.body.classList.remove('speaking');
+              marker.classList.remove('moved');
+              break;
+            case 'boundary':
+            {
+              if (e.name != 'word')
+                break;
+              var substr = speechtext.slice(e.charIndex);
+              var rex = /[\w\d]+/g;
+              var res = rex.exec(substr);
+              if (!res) return;
+              var startOffset = res.index + e.charIndex;
+              var endOffset = rex.lastIndex + e.charIndex;
+              range.setStart(textbeingspoken.firstChild, startOffset);
+              range.setEnd(textbeingspoken.firstChild, endOffset);
+              var rect = range.getBoundingClientRect();
+              var delta = 0;
+              // do I need to scroll?
+              var parentRect = textbeingspoken.getBoundingClientRect();
+              if (rect.bottom > parentRect.bottom) {
+                delta = rect.bottom - parentRect.bottom;
+              }
+              if (rect.top < parentRect.top) {
+                delta = rect.top - parentRect.top;
+              }
+
+              textbeingspoken.scrollBy(0, delta);
+              texttospeak.scrollTo(0, textbeingspoken.scrollTop);
+
+              marker.style.top = rect.top - delta - 1;
+              marker.style.left = rect.left - 1;
+              marker.style.width = rect.width + 1;
+              marker.style.height = rect.height + 1;
+              marker.classList.add('moved');
+              if (firstBoundary) {
+                firstBoundary = false;
+                marker.classList.add('animate');
+              }
+              break;
+            }
+            default:
+              break;
+          }
         }
 
       </script>
