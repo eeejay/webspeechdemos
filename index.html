@@ -310,8 +310,8 @@
                 delta = rect.top - parentRect.top;
               }
 
-              textbeingspoken.scrollBy(0, delta);
-              texttospeak.scrollTo(0, textbeingspoken.scrollTop);
+              textbeingspoken.scrollTop += delta;
+              texttospeak.scrollTop = textbeingspoken.scrollTop;
 
               marker.style.top = rect.top - delta - 1;
               marker.style.left = rect.left - 1;
