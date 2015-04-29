@@ -292,7 +292,7 @@
               if (e.name != 'word')
                 break;
               var substr = speechtext.slice(e.charIndex);
-              var rex = /[\w\d]+/g;
+              var rex = /\S+/g;
               var res = rex.exec(substr);
               if (!res) return;
               var startOffset = res.index + e.charIndex;
