@@ -157,6 +157,11 @@
         -webkit-transition: all 50ms ease;
       }
 
+      button > img {
+        width: 100%;
+        height: auto;
+      }
+
     </style>
     <script>
 
@@ -201,8 +206,8 @@
       <div class="bottom">
         <button type="button" onmousedown="speak();">Speak it</button>
         <button type="button" id="preachit" onmousedown="stop(); speak();">Interrupt</button>
-        <button type="button" class="small" aria-label="Pause/Resume" title="Pause/Resume" onmousedown="playpause();">&#x23ef;</button>
-        <button type="button" class="small" aria-label="Cancel" title="Cancel" onmousedown="stop();">&#x23f9;</button>
+        <button type="button" class="small" aria-label="Pause/Resume" title="Pause/Resume" onmousedown="playpause();"><img src="play_pause.svg"></button>
+        <button type="button" class="small" aria-label="Cancel" title="Cancel" onmousedown="stop();"><img src="stop.svg"></button>
       </div>
       <div class="bottom">
       </div>
