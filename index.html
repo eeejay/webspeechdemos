@@ -78,12 +78,10 @@
       }
       .bottom > * {
       }
-      .bottom button {
-        width: 42%;
-        height: 1.5rem;
-      }
+
       .bottom button.small {
-        width: 1.5rem;
+        height: 3.25rem;
+        width: 3.25rem;
         padding: 0;
       }
 
@@ -162,6 +160,16 @@
         height: auto;
       }
 
+      .widebutton {
+        width: 9rem;
+      }
+
+      .widebutton > button {
+        display: block;
+        margin-bottom: 0.25rem;
+        width: 100%;
+      }
+
     </style>
     <script>
 
@@ -204,8 +212,10 @@
         <label for="voice">Voice</label><select id="voice"></select><button type="button" aria-label="Reset voice" title="Reset voice" onclick="resetVoice();">&#x21b6;</button>
       </div>
       <div class="bottom">
-        <button type="button" onmousedown="speak();">Speak it</button>
-        <button type="button" id="preachit" onmousedown="stop(); speak();">Interrupt</button>
+        <div class="widebutton">
+          <button type="button" onmousedown="speak();"><strong>Speak it</strong></button>
+          <button type="button" id="preachit" onmousedown="stop(); speak();">Interrupt</button>
+        </div>
         <button type="button" class="small" aria-label="Pause/Resume" title="Pause/Resume" onmousedown="playpause();"><img src="play_pause.svg"></button>
         <button type="button" class="small" aria-label="Cancel" title="Cancel" onmousedown="stop();"><img src="stop.svg"></button>
       </div>
