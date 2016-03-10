@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <title>Web Speech Rate Chart</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+    <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <style>
+      #results {
+        margin-top: 20px;
+      }
+      header {
+        padding: 2rem 0px;
+        background-image: linear-gradient(to bottom, rgb(61, 93, 124) 0px, rgb(84, 109, 153) 100%);
+        color: #fff;
+      }
+      header > .container {
+        display: flex;
+        justify-content: start;
+        margin-top: 15px;
+      }
+      h1 {
+        margin: 0px;
+        max-width: 25rem;
+      }
+      select#voices {
+        width: 30rem;
+        max-width: 50%;
+        margin: 0 10px;
+      }
+      #col {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+      }
+      .container {
+        max-width: 800px;
+      }
+      @media all and (max-width: 599px) {
+        header > .container {
+          flex-direction: column;
+        }
+        h1, select#voices, button, input {
+          max-width: inherit;
+          width: 100%;
+          margin: 10px 0;
+        }
+        table {
+          font-size: 8px;
+        }
+      }
+    </style>
+    <style>
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>Speech Rate Benchmark</h1>
+        <select class="form-control" id="voices" multiple></select>
+        <div id="col">
+          <input type="text" class="form-control" id="texttospeak" value="This is a test.">
+          <button type="button" class="btn btn-success" id="startstop" disabled>
+            Start
+          </button>
+        </div>
+      </div>
+    </header>
+    <div id="results" class="container">
+      <div class="table-responsive">
+        <table class="table table-condensed">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="ct-chart ct-minor-seventh"></div>
+    </div>
+    <script type="text/javascript" src="rates.js"></script>
+  </body>
+</html>
