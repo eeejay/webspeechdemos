@@ -167,7 +167,10 @@ startButton.addEventListener("click", e => {
     start(e.target);
   }
 });
+
 buildColumnHeaders();
+plot();
+
 if (speechSynthesis.getVoices().length === 0) {
   speechSynthesis.addEventListener('voiceschanged', initVoices);
 } else {
