@@ -26,7 +26,6 @@ function popupateCell(cell, voice, text, normalDuration) {
     u.onend = e => {
       cell.classList.remove('warning');
       let duration = Date.now() - now;
-      console.log('ended!!', duration);
       cell.dataset.duration = duration;
       cell.dataset.value = normalDuration ? normalDuration / duration : 1;
       cell.textContent = parseFloat(cell.dataset.value).toPrecision(3);
@@ -70,7 +69,7 @@ function buildColumnHeaders() {
   }
 }
 
-function buildVoiceRow(voice) {
+function buildVoiceRow(voice, values) {
   let row = createRow();
   row.className = 'result';
   row.dataset.voice = voice.voiceURI;
@@ -78,10 +77,15 @@ function buildVoiceRow(voice) {
   td.textContent = voice.name;
   row.appendChild(td);
 
-  for (let rateString of RATES) {
+  for (let i in RATES) {
+    let rateString = RATES[i];
     td = document.createElement('td');
     td.className = 'ratecell';
     td.dataset.rate = rateString;
+    if (values && values[i]) {
+      td.dataset.value = values[i];
+      td.textContent = parseFloat(values[i]).toPrecision(3);
+    }
     row.appendChild(td);
   }
 }
@@ -120,7 +124,45 @@ function start() {
   p.then(() => {
     updatePlayState(false);
     plot();
+    updatePermalink();
   });
+}
+
+function parseQueryString() {
+  let query = location.search.substring(1);
+  if (query) {
+    let rows = query.split('&').map(e => e.split('=')[1]);
+    for (let r of rows) {
+      let values = JSON.parse(decodeURIComponent(r));
+      let voice = { voiceURI: values.shift(), name: values.shift() };
+      buildVoiceRow(voice, values);
+    }
+  }
+
+  plot();
+}
+
+function encodeArray(array) {
+  return '?' + array.map((value, index) => {
+    return encodeURIComponent(index) + '=' + encodeURIComponent(JSON.stringify(value));
+  }).join('&');
+}
+
+function updatePermalink() {
+  let rows = Array.from(document.querySelectorAll('#results tr.result'));
+  if (!rows.length)
+    return;
+
+  let data = [];
+  for (let row of rows) {
+    let v = Array.from(row.querySelectorAll('td')).map(cell => cell.dataset.value || cell.textContent);
+    v.unshift(row.dataset.voice);
+    data.push(v);
+  }
+
+  let permalink = document.getElementById('permalink');
+  permalink.href = location;
+  permalink.search = encodeArray(data);
 }
 
 function plot() {
@@ -136,7 +178,8 @@ function plot() {
   series: series
 };
   new Chartist.Line('.ct-chart', data, {
-    axisY: { showLabel: false }
+    axisY: { showLabel: false, offset: 0 },
+    chartPadding: { top: 15, right: 15, bottom: 5, left: 10 }
   });
 };
 
@@ -169,7 +212,8 @@ startButton.addEventListener("click", e => {
 });
 
 buildColumnHeaders();
-plot();
+parseQueryString();
+updatePermalink();
 
 if (speechSynthesis.getVoices().length === 0) {
   speechSynthesis.addEventListener('voiceschanged', initVoices);
