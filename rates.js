@@ -131,9 +131,8 @@ function start() {
 function parseQueryString() {
   let query = location.search.substring(1);
   if (query) {
-    let rows = query.split('&').map(e => e.split('=')[1]);
-    for (let r of rows) {
-      let values = JSON.parse(decodeURIComponent(r));
+    let rows = query.split('&').map(e => JSON.parse(decodeURIComponent(e)));
+    for (let values of rows) {
       let voice = { voiceURI: values.shift(), name: values.shift() };
       buildVoiceRow(voice, values);
     }
@@ -143,9 +142,7 @@ function parseQueryString() {
 }
 
 function encodeArray(array) {
-  return '?' + array.map((value, index) => {
-    return encodeURIComponent(index) + '=' + encodeURIComponent(JSON.stringify(value));
-  }).join('&');
+  return '?' + array.map(value => encodeURIComponent(JSON.stringify(value))).join('&');
 }
 
 function updatePermalink() {
