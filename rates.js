@@ -1,6 +1,6 @@
 'use strict';
 
-const RATES = ['1/10', '1/8' ,'1/4', '1/3', '1/2', '1', '2', '3', '4', '8', '10'];
+const RATES = ['1/2.5', '1/2.25', '1/2' ,'1/1.75', '1/1.5', '1/1.25', '1', '1.25', '1.5', '1.75', '2', '2.25', '2.5'];
 
 function popupateCell(cell, voice, text, normalDuration) {
   if (voice.voiceURI.startsWith('Google') && parseFloat(cell.dataset.rate) > 2) {
