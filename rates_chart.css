@@ -1,0 +1,45 @@
+
+/* The reference line.. */
+.ct-series-a .ct-point, .ct-series-a .ct-line {
+  stroke: #ddd;
+}
+
+.ct-series-b .ct-point, .ct-series-b .ct-line {
+  stroke: #f6511d;
+}
+
+#results tbody tr:nth-child(2) td:first-child {
+  border-left: 4px solid #f6511d;
+}
+
+.ct-series-c .ct-point, .ct-series-c .ct-line {
+  stroke: #00a6ed;
+}
+
+#results tbody tr:nth-child(3) td:first-child {
+  border-left: 4px solid #00a6ed;
+}
+
+.ct-series-d .ct-point, .ct-series-d .ct-line {
+  stroke: #ffb400;
+}
+
+#results tbody tr:nth-child(4) td:first-child {
+  border-left: 4px solid #ffb400;
+}
+
+.ct-series-e .ct-point, .ct-series-e .ct-line {
+  stroke: #7fb800;
+}
+
+#results tbody tr:nth-child(5) td:first-child {
+  border-left: 4px solid #7fb800;
+}
+
+.ct-series-f .ct-point, .ct-series-f .ct-line {
+  stroke: #0d2c54;
+}
+
+#results tbody tr:nth-child(6) td:first-child {
+  border-left: 4px solid #0d2c54;
+}
